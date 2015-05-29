@@ -211,26 +211,26 @@ SMOG_Y_GRADE = 64.6
 SMOG_Z_GRADE = 0.05
 
 def calc_SMOG_index(n_psyl, n_sent):
-    """Метрика SMOG"""
+    """Метрика SMOG для русского языка с константными параментрами"""
     n = SMOG_X_GRADE * sqrt((float(SMOG_Y_GRADE) / n_sent) * n_psyl) + SMOG_Z_GRADE
     return n
 
 def calc_SMOG_index_adapted(n_psyl, n_sent, x, y, z):
-    """Метрика SMOG для английского языка адаптированная с коэффициентами"""
+    """Метрика SMOG для русского языка адаптированная с коэффициентами"""
     n = x * sqrt((float(y) / n_sent) * n_psyl) + z
     return n
 
 DC_X_GRADE = 0.552
 DC_Y_GRADE = 0.273
 
-def calc_Dale_Chale(n_psyl, n_words, n_sent):
-    """Метрика Dale Chale для английского языка"""
+def calc_Dale_Chale_index(n_psyl, n_words, n_sent):
+    """Метрика Dale Chale для русского языка с константным параметрами"""
     n = DC_X_GRADE * (100.0 * n_psyl / n_words) + DC_Y_GRADE * (float(n_words) / n_sent)
     return n
 
 
 def calc_Dale_Chale_adapted(n_psyl, n_words, n_sent, x, y):
-    """Метрика Dale Chale для английского языка"""
+    """Метрика Dale Chale для русского языка с адаптированными параметрами"""
     n = x * (100.0 * n_psyl / n_words) + y * (float(n_words) / n_sent)
     return n
 
@@ -330,7 +330,7 @@ def calc_readability_metrics(text, verbose=True):
                'spaces' : spaces,
                'index_fk_rus': calc_Flesh_Kincaid_Grade_rus_flex(syllabes, words, sentences),
                'index_cl_rus' : calc_Coleman_Liau_index(letters, words, sentences),
-               'index_dc_rus' : calc_Dale_Chale(complex_words, words, sentences),
+               'index_dc_rus' : calc_Dale_Chale_index(complex_words, words, sentences),
                'index_SMOG_rus' : calc_SMOG_index(complex_words, sentences),
                'index_ari_rus' : calc_ARI_index(letters, words, sentences),
 #               'index_fk_rus': calc_Flesh_Kincaid_Grade_rus(syllabes, words, sentences),
@@ -362,7 +362,7 @@ def print_metrics(filename, verbose=True):
           """ %(metrics['chars'], metrics['letters'], metrics['spaces'], metrics['n_words'], metrics['n_complex_words'], metrics['n_syllabes'], metrics['n_sentences'], metrics['c_share'], metrics['avg_syl'], metrics['avg_slen'])#, unfam_words, unf_share)
     print '- SMOG: %f' %(calc_SMOG(metrics['n_complex_words'], metrics['n_sentences']))
     print '- Gunning fog: %f' %(calc_Gunning_fog(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences']))
-    print '- Dale-Chale: %f' %(calc_Dale_Chale(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences']))
+    print '- Dale-Chale: %f' %(calc_Dale_Chale_index(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences']))
     print '- Flesh Kincaid: %f' %(calc_Flesh_Kincaid(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences']))
 #    print '- Flesh Kincaid (rus): %f' %(calc_Flesh_Kincaid_rus(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences']))
     grade = calc_Flesh_Kincaid_Grade_rus(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences'])
@@ -574,5 +574,6 @@ if __name__ == "__main__":
 #    adapt_DL_algorithm()
 #    adapt_FLG_algorithm()
 #    adapt_CLI_algorithm()
+
 
 #    print_all_metrics()
