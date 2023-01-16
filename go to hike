@@ -1,0 +1,8 @@
+sum_item = ''   # сумма вещей
+n = '' # количество вещей
+
+while (bag:= int(input())) < (item:= int(input())):   # вхождение вещей в сумку
+    sum_item += item
+    n += 1
+    
+print(f'Довольно\n{bag}\n{n}')
