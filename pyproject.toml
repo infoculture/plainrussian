@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "plainrussian"
+version = "0.1.1"
+description = "Applying Anglo-Saxon algos to estimate the readability of Russian texts."
+authors = ["Your Name <you@example.com>"]
+license = "CC0 1.0 Universal"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.31.0"
+pymongo = "^4.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
