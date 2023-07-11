@@ -5,7 +5,7 @@ import tornado.web
 import html2text
 import requests
 
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 from readability.readability import Document
 
 from settings import MONGO_HOST, MONGO_PORT
@@ -24,12 +24,10 @@ class RusMeasureHandler(tornado.web.RequestHandler):
         self.conn = MongoClient(MONGO_HOST, MONGO_PORT)
         self.db = self.conn[READ_DB]
         self.log = self.db[LOG_COLL]
-        self.log.ensure_index("reqtime", 1)
+        self.log.create_index([("reqtime", ASCENDING)])
 
     def __log(self, logrec):
-        self.db = self.conn[READ_DB]
-        self.log = self.db[LOG_COLL]
-        self.log.save(logrec)
+        self.log.insert_one(logrec)
 
     def get(self):
         rtime = time.time()

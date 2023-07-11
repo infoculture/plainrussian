@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 import sys
 import signal
@@ -54,8 +51,8 @@ def daemon():
     import tornado.ioloop
     import tornado.wsgi
 
-    #~ # настраиваем Джанго
-    from api.readabilityio import application
+    #~ # настраиваем Торнадо
+    from readabilityio import application
 #
 #    container = tornado.wsgi.WSGIContainer(application) 
     http_server = tornado.httpserver.HTTPServer(application) 

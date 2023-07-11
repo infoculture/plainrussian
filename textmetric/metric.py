@@ -1,11 +1,15 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-__author__ = 'ibegtin'
-from math import sqrt
-import csv
 
+__author__ = 'ibegtin'
+import csv
+from math import sqrt
+import os
 
 from numpy import mean, arange
+
+from settings import BASE_DIR, TEXTSBYGRADE_FOLDER
+
+TEXTSBYGRADE_PATH = os.path.join(BASE_DIR, TEXTSBYGRADE_FOLDER)
 
 
 # Russian sounds and characters
@@ -342,55 +346,59 @@ def calc_readability_metrics(text, verbose=True):
 
 def print_metrics(filename, verbose=True):
     """Расчет метрик"""
-    metrics = calc_text_metrics(filename, verbose)
+    metrics = calc_text_metrics(filename, verbose)["metrics"]
 
-    print u"""
-Файл - %s
-    """ % (filename, )
+    print(f"(Файл - {filename})")
     if verbose:
-        print u"""
-- Символов: %d
-- Букв: %d
-- Пробелов: %d
-- Слов: %d
-- Сложных слов: %d
-- Слогов: %d
-- Предложений: %d
-- Доля сложных слов: %f
-- Среднее число слогов на слово: %f
-- Среднее число слов на предложение: %f
-          """ %(metrics['chars'], metrics['letters'], metrics['spaces'], metrics['n_words'], metrics['n_complex_words'], metrics['n_syllabes'], metrics['n_sentences'], metrics['c_share'], metrics['avg_syl'], metrics['avg_slen'])#, unfam_words, unf_share)
-    print '- SMOG: %f' %(calc_SMOG(metrics['n_complex_words'], metrics['n_sentences']))
-    print '- Gunning fog: %f' %(calc_Gunning_fog(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences']))
-    print '- Dale-Chale: %f' %(calc_Dale_Chale_index(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences']))
-    print '- Flesh Kincaid: %f' %(calc_Flesh_Kincaid(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences']))
-#    print '- Flesh Kincaid (rus): %f' %(calc_Flesh_Kincaid_rus(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences']))
+        print(
+            f"- Символов: {metrics['chars']}\n"
+            f"- Букв: {metrics['letters']}\n"
+            f"- Пробелов: {metrics['spaces']}\n"
+            f"- Слов: {metrics['n_words']}\n"
+            f"- Сложных слов: {metrics['n_complex_words']}\n"
+            f"- Слогов: {metrics['n_syllabes']}\n"
+            f"- Предложений: {metrics['n_sentences']}\n"
+            f"- Доля сложных слов: {metrics['c_share']}\n"
+            f"- Слов: {metrics['n_words']}\n"
+            f"- Среднее число слогов на слово: {metrics['avg_syl']}\n"
+            f"- Среднее число слов на предложение: {metrics['avg_slen']}\n"
+        )
+    print('- SMOG: %f' % (calc_SMOG(metrics['n_complex_words'], metrics['n_sentences'])))
+    print('- Gunning fog: %f' % (
+        calc_Gunning_fog(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences'])))
+    print(
+        '- Dale-Chale: %f' % (calc_Dale_Chale(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences'])))
+    print(
+        '- Flesh Kincaid: %f' % (calc_Flesh_Kincaid(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences'])))
+    #    print('- Flesh Kincaid (rus): %f' %(calc_Flesh_Kincaid_rus(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences'])))
     grade = calc_Flesh_Kincaid_Grade_rus(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences'])
     abs_grade = round(grade)
-    print '- Flesh Kincaid Grade (rus): %f' %(grade)
+    print('- Flesh Kincaid Grade (rus): %f' % (grade))
     if abs_grade in GRADE_TEXT:
-        text =  GRADE_TEXT[abs_grade]
+        text = GRADE_TEXT[abs_grade]
     elif abs_grade > 17:
         text = POST_GRADE_TEXT_18_24
     else:
         text = u'неизвестно (%d)' % (grade)
-    print '- Grade level: %s' % text
-
+    print('- Grade level: %s' % text)
 
 
 def generate_all_metrics(outfile="metrics.csv"):
     f = open(outfile, 'w')
-    fieldnames = ['filename', 'name', 'grade', 'index_fk_rus', 'fk_grade_diff', 'index_cl_rus', 'cl_grade_diff', 'index_dc_rus', 'dc_grade_diff', 'index_SMOG_rus', 'SMOG_grade_diff', 'index_ari_rus', 'ari_grade_diff', 'chars', 'spaces', 'letters', 'n_syllabes', 'n_words', 'n_complex_words', 'n_simple_words', 'n_sentences', 'c_share', 'avg_syl', 'avg_slen', 'wsyllabes']
+    fieldnames = ['filename', 'name', 'grade', 'index_fk_rus', 'fk_grade_diff', 'index_cl_rus', 'cl_grade_diff',
+                  'index_dc_rus', 'dc_grade_diff', 'index_SMOG_rus', 'SMOG_grade_diff', 'index_ari_rus',
+                  'ari_grade_diff', 'chars', 'spaces', 'letters', 'n_syllabes', 'n_words', 'n_complex_words',
+                  'n_simple_words', 'n_sentences', 'c_share', 'avg_syl', 'avg_slen', 'wsyllabes']
     writer = csv.DictWriter(f, fieldnames)
     writer.writeheader()
     diffs = []
-    avg_diff = 0
     for text in TEXT_LIST:
-        metrics = calc_text_metrics('textsbygrade/%d/%s' %(text[1], text[0]))
-        print text[0]
+        metrics = calc_text_metrics(os.path.join(TEXTSBYGRADE_PATH, f"{text[1]}", f"{text[0]}"))
+        print(text[0])
         for k, v in metrics['wsyllabes'].items():
-            print "- %s: %d of %d (%f)" %(k, v, metrics['n_words'], float(v) * 100.0 / metrics['n_words'])
-        print '- simple words: %d (%f%%)' % (metrics['n_simple_words'], float(metrics['n_simple_words']) * 100.0 / metrics['n_words'])
+            print("- %s: %d of %d (%f)" % (k, v, metrics['n_words'], float(v) * 100.0 / metrics['n_words']))
+        print('- simple words: %d (%f%%)' % (
+        metrics['n_simple_words'], float(metrics['n_simple_words']) * 100.0 / metrics['n_words']))
 
         metrics['name'] = text[3]
         metrics['filename'] = text[0]
@@ -425,30 +433,29 @@ def generate_all_metrics(outfile="metrics.csv"):
             grade_diff = metrics['grade'] - metrics['index_ari_rus']
         metrics['ari_grade_diff'] = grade_diff
 
-
         diffs.append(grade_diff)
         for k in metrics.keys():
             metrics[k] = metrics[k].encode('utf8') if type(metrics[k]) == type(u'') else str(metrics[k])
         writer.writerow(metrics)
     avg_diff = mean(diffs)
     diffs.sort()
-    print diffs
-    print avg_diff
+    print(diffs)
+    print(avg_diff)
     f.close()
+
 
 def print_all_metrics():
     for text in TEXT_LIST:
-        print "#", text[3].encode('utf8')
-        print_metrics('textsbygrade/%d/%s' %(text[1], text[0]))
-        print "----"
-
+        print("#", text[3].encode('utf8'))
+        print_metrics(os.path.join(TEXTSBYGRADE_PATH, f"{text[1]}", f"{text[0]}"))
+        print("----")
 
 
 def load_metrics():
     allmetrics = []
     for text in TEXT_LIST:
 #        if text[1] > 16: continue
-        metrics = calc_text_metrics('textsbygrade/%d/%s' %(text[1], text[0]))
+        metrics = calc_text_metrics(os.path.join(TEXTSBYGRADE_PATH, f"{text[1]}", f"{text[0]}"))
         metrics['name'] = text[3]
         metrics['filename'] = text[0]
         metrics['grade'] = text[1]
@@ -499,13 +506,13 @@ def adapt_algorithm_2r(func, keys=[], ranges=[], expected_max=3.0, expected_mean
     total = 1
     for r in ranges:
         total *= (r[1] - r[0]) / r[2]
-        print r
+        print(r)
 
     for r1 in arange(*ranges[0]):
         for r2 in arange(*ranges[1]):
             n += 1
             if n % 1000 == 0:
-                print 'Processing %d of %d' % (n, total), 'values', r1, r2
+                print('Processing %d of %d' % (n, total), 'values', r1, r2)
             diffs = calc_diff(allmetrics, func, keys, [r1, r2])
 #            print diffs
 
@@ -516,13 +523,13 @@ def adapt_algorithm_2r(func, keys=[], ranges=[], expected_max=3.0, expected_mean
                 if avg_hybrid < best_diff[0]:
                     best_diff = [avg_hybrid, avg_mean, avg_max]
                     best_mark = [r1, r2]
-                    print 'Best - x: %f, y: %f with hybrid %f, mean %f and max %f' %(r1, r2, avg_hybrid, avg_mean, avg_max)
+                    print('Best - x: %f, y: %f with hybrid %f, mean %f and max %f' %(r1, r2, avg_hybrid, avg_mean, avg_max))
                     best_alldiffs = diffs
             else:
                 best_diff = [avg_hybrid, avg_mean, avg_max]
                 best_mark = [r1, r2]
                 best_alldiffs = diffs
-    print 'Best - x: %f, y: %f with value hybrid %f, max %f, mean %f ' %(best_mark[0], best_mark[1], best_diff[0], best_diff[1], best_diff[2])
+    print('Best - x: %f, y: %f with value hybrid %f, max %f, mean %f ' %(best_mark[0], best_mark[1], best_diff[0], best_diff[1], best_diff[2]))
 
 def adapt_algorithm_3r(func, keys=[], ranges=[], expected_max=3.0, expected_mean=1.1):
     best_diff = [-1, -1, -1]
@@ -535,14 +542,14 @@ def adapt_algorithm_3r(func, keys=[], ranges=[], expected_max=3.0, expected_mean
     total = 1
     for r in ranges:
         total *= (r[1] - r[0]) / r[2]
-        print r
+        print(r)
 
     for r1 in arange(*ranges[0]):
         for r2 in arange(*ranges[1]):
             for r3 in arange(*ranges[2]):
                 n += 1
                 if n % 1000 == 0:
-                    print 'Processing %d of %d' % (n, total), 'values', r1, r2, r3
+                    print('Processing %d of %d' % (n, total), 'values', r1, r2, r3)
                 diffs = calc_diff(allmetrics, func, keys, [r1, r2, r3])
                 if len(diffs) == 0: continue
                 avg_mean = mean(diffs)
@@ -552,14 +559,15 @@ def adapt_algorithm_3r(func, keys=[], ranges=[], expected_max=3.0, expected_mean
                     if avg_hybrid < best_diff[0]:
                         best_diff = [avg_hybrid, avg_mean, avg_max]
                         best_mark = [r1, r2, r3]
-                        print 'Best - x: %f, y: %f, z: %f with hybrid %f, mean %f and max %f' %(r1, r2, r3, avg_hybrid, avg_mean, avg_max)
-#                        print 'Diffs', diffs
+                        print('Best - x: %f, y: %f, z: %f with hybrid %f, mean %f and max %f' % (
+                        r1, r2, r3, avg_hybrid, avg_mean, avg_max))
+                    #                        print 'Diffs', diffs
                     best_alldiffs = diffs
                 else:
                     best_diff = [avg_hybrid, avg_mean, avg_max]
                     best_mark = [r1, r2, r3]
                     best_alldiffs = diffs
-    print 'Best - x: %f, y: %f, z: %f with value hybrid %f, mean %f, max %f ' %(best_mark[0], best_mark[1], best_mark[2], best_diff[0], best_diff[1], best_diff[2])
+    print('Best - x: %f, y: %f, z: %f with value hybrid %f, mean %f, max %f ' %(best_mark[0], best_mark[1], best_mark[2], best_diff[0], best_diff[1], best_diff[2]))
 
 
 if __name__ == "__main__":
