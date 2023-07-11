@@ -11,5 +11,4 @@ MONGO_HOST = env("MONGO_HOST")
 MONGO_PORT = env("MONGO_PORT")
 TEXTSBYGRADE_FOLDER = env("TEXTSBYGRADE_FOLDER")
 
-BASE_DIR = Path(__file__).resolve().parent
-
+BASE_DIR = Path(__file__).resolve().parent.parent
