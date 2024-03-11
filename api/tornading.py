@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 import sys
 import signal
@@ -54,7 +51,7 @@ def daemon():
     import tornado.ioloop
     import tornado.wsgi
 
-    #~ # настраиваем Джанго
+    #~ # настраиваем Торнадо
     from readabilityio import application
 #
 #    container = tornado.wsgi.WSGIContainer(application) 
@@ -68,18 +65,18 @@ def start():
     if not started:
         pid = Popen([HOST, os.path.abspath(__file__), 'daemon'],
             executable='python').pid
-        print 'Server started at port %s (pid: %i)...' % (PORT, pid)
+        print('Server started at port %s (pid: %i)...' % (PORT, pid))
     else:
-        print 'Server alegry started (pid: %i)' % started
+        print('Server alegry started (pid: %i)' % started)
 
 
 def stop():
     started = alegry_started()
     if started:
         os.kill(started, signal.SIGKILL)
-        print 'Server stoped (pid %i)' % started
+        print('Server stoped (pid %i)' % started)
     else:
-        print 'Server not started'
+        print('Server not started')
 
 
 def restart():
@@ -114,5 +111,5 @@ if len(sys.argv) == 2 and sys.argv[1] in (COMMANDS + ['daemon']):
     cmd = sys.argv[1]
     globals()[cmd]()
 else:
-    print 'Error: invalid command'
-    print 'Usage: python tornader.py {%s}.' % '|'.join(COMMANDS)
+    print('Error: invalid command')
+    print('Usage: python tornader.py {%s}.' % '|'.join(COMMANDS))

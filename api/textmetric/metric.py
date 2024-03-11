@@ -1,25 +1,26 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-__author__ = 'ibegtin'
+__author__ = "ibegtin"
 from math import sqrt
 import csv
-
+import os
 
 from numpy import mean, arange
 
+from settings import BASE_DIR, TEXTSBYGRADE_FOLDER
+
+TEXTSBYGRADE_PATH = os.path.join(BASE_DIR, TEXTSBYGRADE_FOLDER)
 
 # Russian sounds and characters
-RU_CONSONANTS_LOW = [u'к', u'п', u'с', u'т', u'ф', u'х', u'ц', u'ч', u'ш', u'щ']
-RU_CONSONANTS_HIGH = [u'б', u'в', u'г', u'д', u'ж', u'з']
-RU_CONSONANTS_SONOR = [u'л', u'м', u'н', u'р']
-RU_CONSONANTS_YET = [u'й']
+RU_CONSONANTS_LOW = ["к", "п", "с", "т", "ф", "х", "ц", "ч", "ш", "щ"]
+RU_CONSONANTS_HIGH = ["б", "в", "г", "д", "ж", "з"]
+RU_CONSONANTS_SONOR = ["л", "м", "н", "р"]
+RU_CONSONANTS_YET = ["й"]
 
 RU_CONSONANTS = RU_CONSONANTS_HIGH + RU_CONSONANTS_LOW + RU_CONSONANTS_SONOR + RU_CONSONANTS_YET
-RU_VOWELS = [u'а', u'е', u'и', u'у', u'о', u'я', u'ё', u'э', u'ю', u'я', u'ы']
-RU_MARKS = [u'ь', u'ъ']
-SENTENCE_SPLITTERS = [u'.', u'?', u'!']
+RU_VOWELS = ["а", "е", "и", "у", "о", "я", "ё", "э", "ю", "я", "ы"]
+RU_MARKS = ["ь", "ъ"]
+SENTENCE_SPLITTERS = [".", "?", "!"]
 RU_LETTERS = RU_CONSONANTS + RU_MARKS + RU_VOWELS
-SPACES = [u' ', u'\t']
+SPACES = [" ", "\t"]
 
 # List of prepared texts
 TEXT_LIST = [
@@ -34,21 +35,29 @@ TEXT_LIST = [
     ['gaidar_kamen.txt', 1, 'http://www.lib.ru/GOLIKOW/gkamen.txt', u'Аркадий Гайдар. Горячий камень'],
     ['bianki_lesdom.txt', 1, 'http://www.lib.ru/TALES/BIANKI/lesdom.txt', u'Бианки. Лесные домишки'],
 
-    ['text_whitebim.txt', 3, 'http://dog.adgth.ru/files/library/troepolsky_bim.htm', u'Гавриил Троепольский. Белый бим черное ухо.'],
+    ['text_whitebim.txt', 3, 'http://dog.adgth.ru/files/library/troepolsky_bim.htm', u'Гавриил Троепольский. '
+                                                                                     u'Белый бим черное ухо.'],
     ['gaidar_stone.txt', 3, 'http://lib.ru/GOLIKOW/gkamen.txt', u'Гайдар. Горячий камень.'],
-    ['steel_ring.txt', 3, 'http://books.rusf.ru/unzip/add-on/xussr_mr/paustk17.htm?1/1', u'Паустовский. Стальное колечко'],
-    ['gaidar_countries.txt', 4, 'http://skazki.russkay-literatura.ru/proizvedeniya-dlya-detej-ot-8-let/224-dalnie-strany-gajdar-rasskaz.html', u'Гайдар. Дальние страны'],
-    ['gaidar_baraban.txt', 4, 'http://ruslit.traumlibrary.net//book/gaydar-ss03-02/gaydar-ss03-02.html#work001002', u'Гайдар. Судьба барабанщика'],
+    ['steel_ring.txt', 3, 'http://books.rusf.ru/unzip/add-on/xussr_mr/paustk17.htm?1/1', u'Паустовский. '
+                                                                                         u'Стальное колечко'],
+    ['gaidar_countries.txt', 4, "http://skazki.russkay-literatura.ru/proizvedeniya-dlya-detej-ot-"
+                                "8-let/224-dalnie-strany-gajdar-rasskaz.html",
+     u'Гайдар. Дальние страны'],
+    ['gaidar_baraban.txt', 4, 'http://ruslit.traumlibrary.net//book/gaydar-ss03-02/gaydar-ss03-02.html#work001002',
+     u'Гайдар. Судьба барабанщика'],
 #    ['grigor_gutt.txt', 4, 'http://ilibrary.ru/text/1333/p.1/index.html', u'Григорович. Гуттаперчевый мальчик'],
 #    ['korol_blind.txt', 4, 'http://lib.ru/RUSSLIT/KOROLENKO/slepmuz.txt', u'Короленко. Слепой мальчик'],
     ['ryb_kortik.txt', 4, 'http://lib.rus.ec/b/170890/read', u'Рыбаков. Кортик'],
     ['ryb_bird.txt', 4, 'http://lib.rus.ec/b/145680/read', u'Рыбаков. Бронзовая птица'],
     ['tolst_nikita.txt', 4, 'http://az.lib.ru/t/tolstoj_a_n/text_0040.shtml', u'Толстой. Детство Никиты'],
 
-    ['alisa_advent.txt', 5, 'http://www.rusf.ru/kb/stories/puteshestvie_alisy/text-01.htm', u'Кир Булычев. Приключения Алисы'],
+    ['alisa_advent.txt', 5, 'http://www.rusf.ru/kb/stories/puteshestvie_alisy/text-01.htm',
+     u'Кир Булычев. Приключения Алисы'],
 
-    ['text_paust.txt', 6, 'http://paustovskiy.niv.ru/paustovskiy/text/zolotaya-roza/roza_17.htm', u'Паустовский. Старик в станционном буфете'],
-    ['text_paust2.txt', 6, 'http://paustovskiy.niv.ru/paustovskiy/text/zolotaya-roza/roza_1.htm', u'Паустовский. Драгоценная пыль'],
+    ['text_paust.txt', 6, 'http://paustovskiy.niv.ru/paustovskiy/text/zolotaya-roza/roza_17.htm',
+     u'Паустовский. Старик в станционном буфете'],
+    ['text_paust2.txt', 6, 'http://paustovskiy.niv.ru/paustovskiy/text/zolotaya-roza/roza_1.htm',
+     u'Паустовский. Драгоценная пыль'],
     ['text_avenger.txt', 6, 'http://www.litra.ru/fullwork/get/woid/00051901184773070734/', u'Солоухин. Мститель'],
     ['text_srezal.txt', 6, 'http://www.serann.ru/text/srezal-8707', u'Шукшин. Срезал'],
 
@@ -67,7 +76,8 @@ TEXT_LIST = [
     ['kuprin_braslet.txt', 11, 'http://az.lib.ru/k/kuprin_a_i/text_0170.shtml', u'Куприн. Гранатовый браслет'],
 #    ['bunin_udar.txt', 11, 'http://lib.ru/BUNIN/bunin02.txt', u'Бунин. Солнечный удар'],
 #    ['bunin_gospodin.txt', 11, 'http://lib.ru/BUNIN/bunin_gospodin.txt', u'Бунин. Господин из Сан-Франциско'],
-    ['averchenko_nadkin.txt', 11, 'http://lib.ru/RUSSLIT/AWERCHENKO/averchenko_telegraph.txt', u'Аверченко. Телеграфист Надькин'],
+    ['averchenko_nadkin.txt', 11, 'http://lib.ru/RUSSLIT/AWERCHENKO/averchenko_telegraph.txt', u'Аверченко. '
+                                                                                               u'Телеграфист Надькин'],
 #    ['platonov_kotlovan.txt', 11, 'http://ilibrary.ru/text/1010/p.1/index.html', u'Платонов. Котлован'],
 #    ['platonov_yushka.txt', 11, 'http://ilibrary.ru/text/1192/p.1/index.html', u'Платонов. Юшка'],
 #    ['dovlatov_chemodan.txt', 11, 'http://www.lib.ru/DOWLATOW/chemodan.txt', u'Довлатов. Чемодан'],
@@ -77,24 +87,38 @@ TEXT_LIST = [
     ['astafiev_parun.txt', 11, 'http://lib.ru/PROZA/ASTAFIEW/parunia.txt', u'Астафьев. Паруня'],
     ['rasputin_pozhar.txt', 11, 'http://lib.ru/PROZA/RASPUTIN/pozhar.txt', u'Валентин Распутин. Пожар'],
 #    ['rasputin_zhivi.txt', 11, 'http://lib.ru/PROZA/RASPUTIN/rasputin_zhivi.txt', u'Валентин Распутин. Живи и помни'],
-    ['bondarev_hot.txt', 11, 'http://militera.lib.ru/prose/russian/bondarev2/index.html', u'Юрий Бондарев. Горячий снег'],
+    ['bondarev_hot.txt', 11, 'http://militera.lib.ru/prose/russian/bondarev2/index.html', u'Юрий Бондарев. '
+                                                                                          u'Горячий снег'],
 
 
 #    ['text_wiki.txt', 12, 'http://ru.wikipedia.org/wiki/Дорсет', u'Дорсет'],
 
     ['text_rglichnosti.txt', 15, 'http://www.rg.ru/2013/07/05/lichnosti.html', u'Перейдем на личности'],
 
-    ['text_msterms.txt', 17, 'http://www.microsoft.com/rus/info/copyright/', u'Условия использования на сайте Microsoft'],
+    ['text_msterms.txt', 17, 'http://www.microsoft.com/rus/info/copyright/', u'Условия использования '
+                                                                             u'на сайте Microsoft'],
 
 
-    ['text_budget.txt', 17, 'http://kremlin.ru/acts/15786', u'Бюджетное послание Президента Российской Федерации о бюджетной политике в 2013–2015 годах'],
+    ['text_budget.txt', 17, 'http://kremlin.ru/acts/15786',
+     u'Бюджетное послание Президента Российской Федерации о бюджетной политике в 2013–2015 годах'],
     ['text_medvedev.txt', 17, 'http://government.ru/news/2170', u'Заседание Правительства'],
-    ['text_arctic.txt', 17, 'http://government.ru/docs/2753', u'О разрешениях на осуществление деятельности в Антарктике'],
-    ['fks.txt', 17, 'http://base.consultant.ru/cons/cgi/online.cgi?req=doc;base=LAW;n=144624', u'Закон о ФКС'],
-    ['minec_polozh.txt', 17, 'http://www.economy.gov.ru/minec/about/rukdocmin/index', u'Руководящие документы министерства'],
-    ['gov_sudeb.txt', 17, 'http://government.ru/activities/2606', u'Комиссия Правительства по законопроектной деятельности одобрила с учётом состоявшегося обсуждения законопроект «О судебно-экспертной деятельности в Российской Федерации»'],
-    ['adm_reg_minpri.txt', 17, 'http://www.mnr.gov.ru/regulatory/detail.php?ID=130938', u'«Об утверждении Административного регламента Федеральной службы по надзору в сфере природопользования по предоставлению государственной услуги по выдаче разрешений на ввоз в Российскую Федерацию или транзит через территорию Российской Федерации ядовитых веществ»'],
-    ['gov_bill2.txt', 17, 'http://government.ru/activities/2464', u'Комиссия Правительства по законопроектной деятельности одобрила законопроект, направленный на повышение эффективности реализации государственной политики и выполнения мероприятий в области гражданской обороны'],
+    ['text_arctic.txt', 17, 'http://government.ru/docs/2753',
+     u'О разрешениях на осуществление деятельности в Антарктике'],
+    ['fks.txt', 17, 'http://base.consultant.ru/cons/cgi/online.cgi?req=doc;base=LAW;n=144624',
+     u'Закон о ФКС'],
+    ['minec_polozh.txt', 17, 'http://www.economy.gov.ru/minec/about/rukdocmin/index',
+     u'Руководящие документы министерства'],
+    ['gov_sudeb.txt', 17, 'http://government.ru/activities/2606',
+     u'Комиссия Правительства по законопроектной деятельности одобрила с учётом состоявшегося '
+     u'обсуждения законопроект «О судебно-экспертной деятельности в Российской Федерации»'],
+    ['adm_reg_minpri.txt', 17, 'http://www.mnr.gov.ru/regulatory/detail.php?ID=130938',
+     u'«Об утверждении Административного регламента Федеральной службы по надзору в сфере '
+     u'природопользования по предоставлению государственной услуги по выдаче разрешений '
+     u'на ввоз в Российскую Федерацию или транзит через территорию Российской Федерации ядовитых веществ»'],
+    ['gov_bill2.txt', 17, 'http://government.ru/activities/2464',
+     u'Комиссия Правительства по законопроектной деятельности одобрила законопроект, '
+     u'направленный на повышение эффективности реализации государственной политики и выполнения '
+     u'мероприятий в области гражданской обороны'],
     ['gov_bill_film.txt', 17, 'http://government.ru/activities/2412', u'О внесении в Госдуму законопроекта, направленного на сокращение сроков амортизации нематериальных активов в сфере кино и оптимизацию расходов на рекламу фильмов'],
     ['mintrans_news1.txt', 17, 'http://www.mintrans.ru/news/detail.php?ELEMENT_ID=20464', u'5 июля состоялось совместное заседание'],
     ['scrf_concept.txt', 17, 'http://www.scrf.gov.ru/documents/2/25.html', u'Концепция внешней политики Российской Федерации'],
@@ -163,20 +187,15 @@ def calc_Flesh_Kincaid_Grade_rus(n_syllabes, n_words, n_sent):
 
 def calc_Flesh_Kincaid_Grade_rus_adapted(n_syllabes, n_words, n_sent, X, Y, Z):
     """Метрика Flesh Kincaid Grade для русского языка с параметрами"""
-#    n = 0.59 * (float(n_words) / n_sent) + 6.2 * (float(n_syllabes) / n_words) - 16.59
     if n_words == 0 or n_sent == 0: return 0
     n = X * (float(n_words) / n_sent) + Y * (float(n_syllabes) / n_words) - Z
     return n
-
-
-#X_GRADE = 0.186
-#Y_GRADE = 7.21
-#Z_GRADE = 15.443
 
 # Flesh Kinkaid Grade константы. Подробнее http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests
 FLG_X_GRADE = 0.318
 FLG_Y_GRADE = 14.2
 FLG_Z_GRADE = 30.5
+
 
 def calc_Flesh_Kincaid_Grade_rus_flex(n_syllabes, n_words, n_sent):
     """Метрика Flesh Kincaid Grade для русского языка с константными параметрами"""
@@ -212,11 +231,13 @@ SMOG_X_GRADE = 1.1
 SMOG_Y_GRADE = 64.6
 SMOG_Z_GRADE = 0.05
 
+
 def calc_SMOG_index(n_psyl, n_sent):
     """Метрика SMOG для русского языка"""
     if n_sent == 0: return 0
     n = SMOG_X_GRADE * sqrt((float(SMOG_Y_GRADE) / n_sent) * n_psyl) + SMOG_Z_GRADE
     return n
+
 
 def calc_SMOG_index_adapted(n_psyl, n_sent, x, y, z):
     """Метрика SMOG для русского языка адаптированная с коэффициентами"""
@@ -226,11 +247,12 @@ def calc_SMOG_index_adapted(n_psyl, n_sent, x, y, z):
 DC_X_GRADE = 0.552
 DC_Y_GRADE = 0.273
 
-def calc_Dale_Chale(n_psyl, n_words, n_sent):
-    """Метрика Dale Chale для английского языка"""
-    if n_words == 0 or n_sent == 0: return 0
-    n = DC_X_GRADE * (100.0 * n_psyl / n_words) + DC_Y_GRADE * (float(n_words) / n_sent)
-    return n
+
+# def calc_Dale_Chale(n_psyl, n_words, n_sent):
+#     """Метрика Dale Chale для английского языка"""
+#     if n_words == 0 or n_sent == 0: return 0
+#     n = DC_X_GRADE * (100.0 * n_psyl / n_words) + DC_Y_GRADE * (float(n_words) / n_sent)
+#     return n
 
 
 def calc_Dale_Chale_adapted(n_psyl, n_words, n_sent, x, y):
@@ -259,9 +281,9 @@ def calc_ARI_index(n_letters, n_words, n_sent):
 def load_words(filename):
     """Load words from filename"""
     words = []
-    f = open(filename, 'r')
+    f = open(filename, 'r', encoding="utf-8")
     for l in f:
-        words.append(l.strip().decode('utf8'))
+        words.append(l.strip())
     f.close()
     return words
 
@@ -272,8 +294,8 @@ bad_chars = '(){}<>"\'!?,.:;'
 
 def calc_text_metrics(filename, verbose=True):
     """Расчет метрик"""
-    f = open(filename, 'r')
-    text = f.read().decode('utf8')    
+    f = open(filename, 'r', encoding="utf-8")
+    text = f.read()
     f.close()
     return calc_readability_metrics(text, verbose)
 
@@ -361,7 +383,7 @@ def add_grade_text(grade):
     @rtype : basestring
     """
     grade = round(grade)
-    print grade
+    print(grade)
     if grade in GRADE_TEXT:
         text =  GRADE_TEXT[grade]
     elif grade > 17:
@@ -374,40 +396,38 @@ def add_grade_text(grade):
 
 def print_metrics(filename, verbose=True):
     """Расчет метрик"""
-    metrics = calc_text_metrics(filename, verbose)
+    metrics = calc_text_metrics(filename, verbose)["metrics"]
 
-    print u"""
-Файл - %s
-    """ % (filename, )
+    print(f"(Файл - {filename})")
     if verbose:
-        print u"""
-- Символов: %d
-- Букв: %d
-- Пробелов: %d
-- Слов: %d
-- Сложных слов: %d
-- Слогов: %d
-- Предложений: %d
-- Доля сложных слов: %f
-- Среднее число слогов на слово: %f
-- Среднее число слов на предложение: %f
-          """ %(metrics['chars'], metrics['letters'], metrics['spaces'], metrics['n_words'], metrics['n_complex_words'], metrics['n_syllabes'], metrics['n_sentences'], metrics['c_share'], metrics['avg_syl'], metrics['avg_slen'])#, unfam_words, unf_share)
-    print '- SMOG: %f' %(calc_SMOG(metrics['n_complex_words'], metrics['n_sentences']))
-    print '- Gunning fog: %f' %(calc_Gunning_fog(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences']))
-    print '- Dale-Chale: %f' %(calc_Dale_Chale(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences']))
-    print '- Flesh Kincaid: %f' %(calc_Flesh_Kincaid(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences']))
-#    print '- Flesh Kincaid (rus): %f' %(calc_Flesh_Kincaid_rus(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences']))
+        print(
+            f"- Символов: {metrics['chars']}\n"
+            f"- Букв: {metrics['letters']}\n"
+            f"- Пробелов: {metrics['spaces']}\n"
+            f"- Слов: {metrics['n_words']}\n"
+            f"- Сложных слов: {metrics['n_complex_words']}\n"
+            f"- Слогов: {metrics['n_syllabes']}\n"
+            f"- Предложений: {metrics['n_sentences']}\n"
+            f"- Доля сложных слов: {metrics['c_share']}\n"
+            f"- Слов: {metrics['n_words']}\n"
+            f"- Среднее число слогов на слово: {metrics['avg_syl']}\n"
+            f"- Среднее число слов на предложение: {metrics['avg_slen']}\n"
+        )
+    print('- SMOG: %f' %(calc_SMOG(metrics['n_complex_words'], metrics['n_sentences'])))
+    print('- Gunning fog: %f' %(calc_Gunning_fog(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences'])))
+    print('- Dale-Chale: %f' %(calc_Dale_Chale(metrics['n_complex_words'], metrics['n_words'], metrics['n_sentences'])))
+    print('- Flesh Kincaid: %f' %(calc_Flesh_Kincaid(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences'])))
+#    print('- Flesh Kincaid (rus): %f' %(calc_Flesh_Kincaid_rus(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences'])))
     grade = calc_Flesh_Kincaid_Grade_rus(metrics['n_syllabes'], metrics['n_words'], metrics['n_sentences'])
     abs_grade = round(grade)
-    print '- Flesh Kincaid Grade (rus): %f' %(grade)
+    print('- Flesh Kincaid Grade (rus): %f' %(grade))
     if abs_grade in GRADE_TEXT:
         text =  GRADE_TEXT[abs_grade]
     elif abs_grade > 17:
         text = POST_GRADE_TEXT_18_24
     else:
         text = u'неизвестно (%d)' % (grade)
-    print '- Grade level: %s' % text
-
+    print('- Grade level: %s' % text)
 
 
 def generate_all_metrics(outfile="metrics.csv"):
@@ -416,13 +436,12 @@ def generate_all_metrics(outfile="metrics.csv"):
     writer = csv.DictWriter(f, fieldnames)
     writer.writeheader()
     diffs = []
-    avg_diff = 0
     for text in TEXT_LIST:
-        metrics = calc_text_metrics('textsbygrade/%d/%s' %(text[1], text[0]))
-        print text[0]
+        metrics = calc_text_metrics(os.path.join(TEXTSBYGRADE_PATH, f"{text[1]}", f"{text[0]}"))
+        print(text[0])
         for k, v in metrics['wsyllabes'].items():
-            print "- %s: %d of %d (%f)" %(k, v, metrics['n_words'], float(v) * 100.0 / metrics['n_words'])
-        print '- simple words: %d (%f%%)' % (metrics['n_simple_words'], float(metrics['n_simple_words']) * 100.0 / metrics['n_words'])
+            print("- %s: %d of %d (%f)" %(k, v, metrics['n_words'], float(v) * 100.0 / metrics['n_words']))
+        print('- simple words: %d (%f%%)' % (metrics['n_simple_words'], float(metrics['n_simple_words']) * 100.0 / metrics['n_words']))
 
         metrics['name'] = text[3]
         metrics['filename'] = text[0]
@@ -464,23 +483,22 @@ def generate_all_metrics(outfile="metrics.csv"):
         writer.writerow(metrics)
     avg_diff = mean(diffs)
     diffs.sort()
-    print diffs
-    print avg_diff
+    print(diffs)
+    print(avg_diff)
     f.close()
 
 def print_all_metrics():
     for text in TEXT_LIST:
-        print "#", text[3].encode('utf8')
-        print_metrics('textsbygrade/%d/%s' %(text[1], text[0]))
-        print "----"
-
+        print("#", text[3].encode('utf8'))
+        print_metrics(os.path.join(TEXTSBYGRADE_PATH, f"{text[1]}", f"{text[0]}"))
+        print("----")
 
 
 def load_metrics():
     allmetrics = []
     for text in TEXT_LIST:
 #        if text[1] > 16: continue
-        metrics = calc_text_metrics('textsbygrade/%d/%s' %(text[1], text[0]))
+        metrics = calc_text_metrics(os.path.join(TEXTSBYGRADE_PATH, f"{text[1]}", f"{text[0]}"))
         metrics['name'] = text[3]
         metrics['filename'] = text[0]
         metrics['grade'] = text[1]
@@ -531,13 +549,13 @@ def adapt_algorithm_2r(func, keys=[], ranges=[], expected_max=3.0, expected_mean
     total = 1
     for r in ranges:
         total *= (r[1] - r[0]) / r[2]
-        print r
+        print(r)
 
     for r1 in arange(*ranges[0]):
         for r2 in arange(*ranges[1]):
             n += 1
             if n % 1000 == 0:
-                print 'Processing %d of %d' % (n, total), 'values', r1, r2
+                print('Processing %d of %d' % (n, total), 'values', r1, r2)
             diffs = calc_diff(allmetrics, func, keys, [r1, r2])
 #            print diffs
 
@@ -548,13 +566,13 @@ def adapt_algorithm_2r(func, keys=[], ranges=[], expected_max=3.0, expected_mean
                 if avg_hybrid < best_diff[0]:
                     best_diff = [avg_hybrid, avg_mean, avg_max]
                     best_mark = [r1, r2]
-                    print 'Best - x: %f, y: %f with hybrid %f, mean %f and max %f' %(r1, r2, avg_hybrid, avg_mean, avg_max)
+                    print('Best - x: %f, y: %f with hybrid %f, mean %f and max %f' %(r1, r2, avg_hybrid, avg_mean, avg_max))
                     best_alldiffs = diffs
             else:
                 best_diff = [avg_hybrid, avg_mean, avg_max]
                 best_mark = [r1, r2]
                 best_alldiffs = diffs
-    print 'Best - x: %f, y: %f with value hybrid %f, max %f, mean %f ' %(best_mark[0], best_mark[1], best_diff[0], best_diff[1], best_diff[2])
+    print('Best - x: %f, y: %f with value hybrid %f, max %f, mean %f ' %(best_mark[0], best_mark[1], best_diff[0], best_diff[1], best_diff[2]))
 
 def adapt_algorithm_3r(func, keys=[], ranges=[], expected_max=3.0, expected_mean=1.1):
     best_diff = [-1, -1, -1]
@@ -567,14 +585,14 @@ def adapt_algorithm_3r(func, keys=[], ranges=[], expected_max=3.0, expected_mean
     total = 1
     for r in ranges:
         total *= (r[1] - r[0]) / r[2]
-        print r
+        print(r)
 
     for r1 in arange(*ranges[0]):
         for r2 in arange(*ranges[1]):
             for r3 in arange(*ranges[2]):
                 n += 1
                 if n % 1000 == 0:
-                    print 'Processing %d of %d' % (n, total), 'values', r1, r2, r3
+                    print('Processing %d of %d' % (n, total), 'values', r1, r2, r3)
                 diffs = calc_diff(allmetrics, func, keys, [r1, r2, r3])
                 if len(diffs) == 0: continue
                 avg_mean = mean(diffs)
@@ -584,14 +602,15 @@ def adapt_algorithm_3r(func, keys=[], ranges=[], expected_max=3.0, expected_mean
                     if avg_hybrid < best_diff[0]:
                         best_diff = [avg_hybrid, avg_mean, avg_max]
                         best_mark = [r1, r2, r3]
-                        print 'Best - x: %f, y: %f, z: %f with hybrid %f, mean %f and max %f' %(r1, r2, r3, avg_hybrid, avg_mean, avg_max)
-#                        print 'Diffs', diffs
+                        print('Best - x: %f, y: %f, z: %f with hybrid %f, mean %f and max %f' %(r1, r2, r3, avg_hybrid, avg_mean, avg_max))
                     best_alldiffs = diffs
                 else:
                     best_diff = [avg_hybrid, avg_mean, avg_max]
                     best_mark = [r1, r2, r3]
-                    best_alldiffs = diffs
-    print 'Best - x: %f, y: %f, z: %f with value hybrid %f, mean %f, max %f ' %(best_mark[0], best_mark[1], best_mark[2], best_diff[0], best_diff[1], best_diff[2])
+    print(
+        f"Best - x: {best_mark[0]}, y:{best_mark[1]}, z: {best_mark[2]} "
+        f"with value hybrid {best_diff[0]}, mean {best_diff[1]}, max {best_diff[2]}"
+    )
 
 
 if __name__ == "__main__":
@@ -599,7 +618,7 @@ if __name__ == "__main__":
 #    adapt_algorithm_2r(calc_Dale_Chale_adapted, ['n_complex_words', 'n_words', 'n_sentences'], ranges=[[0.4, 1.2, 0.001], [0.01, 0.3, 0.001]], expected_max=0, expected_mean=0)
 #    adapt_algorithm_3r(calc_ARI_index_adapted, ['letters', 'n_words', 'n_sentences'], ranges=[[6.26, 6.27, 0.001], [0.28, 0.4, 0.0001], [30, 40, 0.01]], expected_max=0, expected_mean=0)
 #    adapt_algorithm_3r(calc_SMOG_index_adapted, ['n_complex_words', 'n_sentences'], ranges=[[0.5, 1.5, 0.05], [60, 90, 0.2], [0.001, 5, 0.001]], expected_max=0, expected_mean=0)
-    adapt_algorithm_3r(calc_Flesh_Kincaid_Grade_rus_adapted, ['n_syllabes', 'n_words', 'n_sentences'], ranges=[[0.001, 0.4, 0.001], [4, 20, 0.1], [10, 40, 0.05]], expected_max=0, expected_mean=0)
+#     adapt_algorithm_3r(calc_Flesh_Kincaid_Grade_rus_adapted, ['n_syllabes', 'n_words', 'n_sentences'], ranges=[[0.001, 0.4, 0.001], [4, 20, 0.1], [10, 40, 0.05]], expected_max=0, expected_mean=0)
 #    adapt_algorithm_3r(calc_Coleman_Liau_index_adapted, ['letters', 'n_words', 'n_sentences'], ranges=[[0.042, 0.08, 0.001], [0.3, 0.8, 0.01], [10, 30, 0.01]], expected_max=0, expected_mean=0)
 #    adapt_ARI_algorithm()
 #    adapt_SMOG_algorithm()

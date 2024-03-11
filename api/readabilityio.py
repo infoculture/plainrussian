@@ -1,17 +1,16 @@
-import tornado.httpserver
-import tornado.ioloop
+import json
+import time
+
 import tornado.web
-#import memcache
-import chardet
-import urllib
 import html2text
 import requests
-import json
-from django.utils.feedgenerator import Rss201rev2Feed, Atom1Feed
-from pymongo import Connection
+
+from pymongo import MongoClient, ASCENDING
 from readability.readability import Document
+
+from settings import MONGO_HOST, MONGO_PORT
 from textmetric.metric import calc_readability_metrics
-import time
+
 
 READ_DB = 'readability'
 LOG_COLL = 'log'
@@ -19,19 +18,16 @@ LOG_COLL = 'log'
 ERROR_NONE = 0
 ERROR_INVALID_DATA = 101
 
+
 class RusMeasureHandler(tornado.web.RequestHandler):
     def initialize(self):
-        self.conn = Connection()
+        self.conn = MongoClient(MONGO_HOST, MONGO_PORT)
         self.db = self.conn[READ_DB]
         self.log = self.db[LOG_COLL]
-        self.log.ensure_index("reqtime", 1)
+        self.log.create_index([("reqtime", ASCENDING)])
 
     def __log(self, logrec):
-        self.conn = Connection()
-        self.db = self.conn[READ_DB]
-        self.log = self.db[LOG_COLL]
-        self.log.save(logrec)
-
+        self.log.insert_one(logrec)
 
     def get(self):
         rtime = time.time()
@@ -41,7 +37,7 @@ class RusMeasureHandler(tornado.web.RequestHandler):
         debug = int(debug) if debug.isdigit() else 0
         r = requests.get(url)
         ctype = r.headers['content-type'].lower() if 'content-type' in r.headers.keys() else 'text/html'
-        print ctype
+        print(ctype)
         ctype = ctype.split(';', 1)[0]
         if ctype == 'text/html':
             ht = html2text.HTML2Text()
@@ -51,8 +47,7 @@ class RusMeasureHandler(tornado.web.RequestHandler):
             text = ht.handle(Document(r.text).summary())
             status = ERROR_NONE
         elif ctype == 'text/plain':
-           
-            print type(r.content)
+            print(type(r.content))
             text = r.content.decode('utf8', 'ignore')
 #            text = r.text.decode('utf8', 'ignore')
             status = ERROR_NONE
@@ -93,8 +88,6 @@ class RusMeasureHandler(tornado.web.RequestHandler):
         logreq['reqtime'] = rtime
         logreq['time'] = etime
         self.__log(logreq)
-
-
 
 
 application = tornado.web.Application([
